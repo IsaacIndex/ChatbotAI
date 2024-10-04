@@ -7,7 +7,7 @@ from langchain_core.documents import Document
 url = 'https://www.ishtar-collective.net'
 
 
-def fetch_docs():
+def crawl_books():
     req = Request(f'{url}/categories/book-unveiling',
                   headers={'User-Agent': 'Mozilla/5.0'})
     html_page = urlopen(req).read()
