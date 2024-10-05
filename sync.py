@@ -5,7 +5,8 @@ import argparse
 import os
 import shutil
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import Chroma
+from langchain_chroma import Chroma
+from tqdm import tqdm
 
 from crawl_url import crawl_books
 from embedding_func import get_embedding_function
@@ -15,8 +16,7 @@ CHROMA_PATH = "chroma"
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--reset", action="store_true",
-                        help="Reset the database.")
+    parser.add_argument("--reset", action="store_true", help="Reset the database.")
     args = parser.parse_args()
     if args.reset:
         print("✨ Clearing Database")
@@ -59,8 +59,14 @@ def add_to_chroma(chunks: list[Document]):
 
     if len(new_chunks):
         print(f"👉 Adding new documents: {len(new_chunks)}")
-        new_chunk_ids = [chunk.metadata["id"] for chunk in new_chunks]
-        db.add_documents(new_chunks, ids=new_chunk_ids)
+
+        # new_chunk_ids = [chunk.metadata["id"] for chunk in new_chunks]
+        # db.add_documents(new_chunks, ids=new_chunk_ids)
+
+        with tqdm(total=len(new_chunks)) as db_bar:
+            for chunk in new_chunks:
+                db.add_documents([chunk], ids=[chunk.metadata["id"]])
+                db_bar.update(1)
     else:
         print("✅ No new documents to add")
 
